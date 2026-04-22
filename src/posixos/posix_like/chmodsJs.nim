@@ -2,8 +2,9 @@
 
 when defined(js):
   import ../common
-
-  type Mode* = cint
+  from pkg/pystat/types import Mode
+  export Mode
+  
   using mode: Mode
   proc chmodImpl(path: cstring, mode){.importDenoOrNodeMod(fs, chmodSync).}
   proc lchmodImpl(path: cstring, mode){.importNode(fs, lchmodSync).}  ## XXX: nodejs: only works on macos
