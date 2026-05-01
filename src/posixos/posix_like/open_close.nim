@@ -85,13 +85,14 @@ proc open*(path: PathLike, flags: int, mode=0o777, dir_fd = -1): int{.forbids: [
           fd = c_openat(dir_fd.cint, spath.cstring, cflags, mode)
         else:
           fd = posix.open(spath.cstring, cflags, Mode mode)
-        discard setInheritable(FileHandle fd, false)
       if not (
         fd < 0 and errno == EINTR
       ): break
     if fd < 0:
       path.raiseErrnoWithPath()
     result = fd
+    when not defined(windows):
+      discard setInheritable(FileHandle fd, false)
 
 
 proc close*(fd: int) =

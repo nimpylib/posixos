@@ -10,4 +10,7 @@ suite "os":
     let ls = os.listdir(d)
     check "test1.nim" in ls
 
+  test "open":
+    expect FileExistsError:
+      let _ = os.open(currentSourcePath(), os.O_EXCL or os.O_CREAT)
 
