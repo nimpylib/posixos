@@ -67,9 +67,6 @@ proc getsize*[T](filename: PathLike[T]): int =
   # std/os.`getFileSize` doesn't work for directory
   int statAttr(filename, st_size)
 
-func samefile*(a, b: PathLike): bool =
-  tryOsOp(a, b): result = samefile(a.fspath, b.fspath)
-
 template split2Via(p, fn) =
   let t = fn $p
   result[0] = mapPathLike[T] t[0]
@@ -116,6 +113,10 @@ macro join*[T: PyStr|PyBytes](a: T, ps: varargs[T]): T =
 proc samestat*(s1, s2: stat_result): bool =
    return (s1.st_ino == s2.st_ino and
             s1.st_dev == s2.st_dev)
+
+proc samefile*(a, b: PathLike): bool =
+  tryOsOp(a, b):
+    result = samestat(stat(a), stat(b))
 
 proc normcase*[T](s: PathLike[T]): T =
  when not defined(windows): os.fspath(s) else:
