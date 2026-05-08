@@ -2,6 +2,9 @@
 import std/os as nos
 import std/times as ntimes
 import std/macros
+when defined(windows):
+  from std/strutils import replace
+  import pkg/py_winapi/cwrap/locale
 import ./posix_like/stat
 
 import ./common
@@ -113,3 +116,25 @@ macro join*[T: PyStr|PyBytes](a: T, ps: varargs[T]): T =
 proc samestat*(s1, s2: stat_result): bool =
    return (s1.st_ino == s2.st_ino and
             s1.st_dev == s2.st_dev)
+
+proc normcase*[T](s: PathLike[T]): T =
+ when not defined(windows): os.fspath(s) else:
+  # ntpath:
+  var s = os.fspath(s)
+  if s.len == 0:
+    return s
+  when T is PyBytes:
+    when not compiles((b"").decode("utf-8", "surrogateescape")):
+      {.error: "not impl".}
+    else:
+      #TODO:decode
+      let encoding = sys.getfilesystemencoding()
+      s = s.decode(encoding, "surrogateescape").replace('/', '\\')
+      s = LCMapStringEx(LOCALE_NAME_INVARIANT,
+                       LCMAP.LOWERCASE, s)
+      return s.encode(encoding, "surrogateescape")
+  else:
+    return LCMapStringEx(LOCALE_NAME_INVARIANT,
+                          LCMAP.LOWERCASE,
+                          s.replace('/', '\\'))
+

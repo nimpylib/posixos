@@ -36,3 +36,6 @@ pylib "pysignal", " ^= 0.1.0"
 pylib "errno", " ^= 0.1.0"
 pylib "pystat", " ^= 0.1.0"
 pylib "pyresource", " ^= 0.1.0"
+when defined(windows):
+  pylib "py_winapi", " ^= 0.1.0"
+
