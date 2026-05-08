@@ -46,16 +46,9 @@ else:
     kind: PathComponent
 const havePDir = declared(Dir)
 type ScandirIterator[T] = ref object
-    when havePDir:
-      when T is int:
-        dirp: ptr Dir
     iter: iterator(): DirEntry[T]
 
 func close*(scandirIter: ScandirIterator) = discard
-func close*(scandirIter: ScandirIterator[int]) =
-  when havePDir and not InJs:
-    discard closedir scandirIter.dirp
-    scandirIter.dirp = nil
 iterator items*[T](scandirIter: ScandirIterator[T]): DirEntry[T] =
   for i in scandirIter.iter():
     yield i
@@ -194,11 +187,20 @@ type ScandirNotSupportFd = object of RootEffect
 proc eScandirType{.tags: [ScandirNotSupportFd].} =
   raise newException(TypeError,
   "scandir: path should be string, bytes, os.PathLike or None, not int")
+
+when HAVE_FDOPENDIR and HAVE_FDOPENDIR_RUNTIME:
+  proc nulledArr2String(oa: openArray[cchar]): string =
+    for c in oa:
+      if c == '\0': break
+      result.add char c
+
 template scandirImpl(path){.dirty.} =
   sys.audit("os.scandir", path)
   when path is int:
     when HAVE_FDOPENDIR:
       when HAVE_FDOPENDIR_RUNTIME:
+        #XXX: note `closedir` on `dirp` will also *close* fd,
+        #  so we didn't do it within `scandir`
         var dirp = fdopendir(cint path)
         if dirp.isNil:
           raiseErrnoWithPath($path)
@@ -215,7 +217,7 @@ template scandirImpl(path){.dirty.} =
             cname[1] == '\0' or (cname[1] == '.' and cname[2] == '\0')
           )
           if not is_dot:
-            let name = $cname
+            let name = nulledArr2String cname
             let de = newDirEntry[T](name = name, dir = path,
               kind=nimPCKindFromDirent(path, name, direntp))
             yield de
