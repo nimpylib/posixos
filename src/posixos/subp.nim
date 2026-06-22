@@ -3,7 +3,7 @@ import ./common
 when not defined(js):
   proc c_system(cmd: cstring): cint{.importc: "system", header: "<stdlib.h>".}
 
-proc system*(cmd: string): int{.discardable.} =
+proc system*(command: string): int{.discardable.} =
   ## os.system
   runnableExamples:
     const
@@ -12,9 +12,9 @@ proc system*(cmd: string): int{.discardable.} =
       e2null = "echo 1 >" & mydevnull
     assert system(e2null) == 0
 
-  sys.audit("os.system", cmd)
+  sys.audit("os.system", command)
   when defined(js):
-    let jsStr = cmd.cstring
+    let jsStr = command.cstring
     var res: c_int
     asm """
     const {exec} = require('node:child_process');
@@ -23,5 +23,5 @@ proc system*(cmd: string): int{.discardable.} =
     """
     result = res.int
   else:
-    c_system cmd.cstring
+    c_system command.cstring
 

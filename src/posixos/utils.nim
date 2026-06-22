@@ -19,12 +19,12 @@ else:
   proc getcwdb*(): PyBytes = bytes getCurrentDir()
   proc chdirImpl(s: PathLike) = setCurrentDir $s
 
-proc chdir*(s: PathLike) =
-  sys.audit("os.chdir", s)
-  chdirImpl(s)
+proc chdir*(path: PathLike) =
+  sys.audit("os.chdir", path)
+  chdirImpl(path)
 
-proc makedirs*[T](d: PathLike[T], mode=0o777, exist_ok=false) =
-  let dir = $d
+proc makedirs*[T](name: PathLike[T], mode=0o777, exist_ok=false) =
+  let dir = $name
   if dir == "":
     return
   var omitNext = isAbsolute(dir)
@@ -35,12 +35,12 @@ proc makedirs*[T](d: PathLike[T], mode=0o777, exist_ok=false) =
       p.tryOsOp not exist_ok or not dirExists(p):
         mkdir(p, mode)
 
-proc removedirs*(d: PathLike) =
-  let dir = $d
+proc removedirs*(name: PathLike) =
+  let dir = $name
   if dir == "":
     return
   # raises OSError if the leaf directory could not be successfully removed.
-  rmdir(d)  
+  rmdir(name)  
   var omitNext = isAbsolute(dir)
   try:
     for p in parentDirs(dir, inclusive=false):
