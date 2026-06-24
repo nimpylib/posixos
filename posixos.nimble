@@ -38,4 +38,6 @@ pylib "pystat", " ^= 0.1.0"
 pylib "pyresource", " ^= 0.1.0"
 when defined(windows):
   pylib "py_winapi", " ^= 0.1.0"
+elif defined(posix):
+  pylib "grp_pwd", " ^= 0.1.0"
 

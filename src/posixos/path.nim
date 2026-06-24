@@ -2,6 +2,7 @@
 import std/os as nos
 import std/times as ntimes
 import std/macros
+import pkg/handy_sugars/trans_imp
 when defined(windows):
   from std/strutils import replace
   import pkg/py_winapi/cwrap/locale
@@ -14,6 +15,8 @@ when InJs:
 
 import ./consts
 export consts
+
+impExpCwd path, [expanduser, ]
 
 template templfExp(nam, nimProc, resType){.dirty.} =
   func nam*(s: PathLike): resType = nimProc s.fspath
@@ -87,8 +90,6 @@ func splitext*[T](p: PathLike[T]): (T, T) =
     mapPathLike[T](s[idx..^1])
   )
 
-# fsExp expanduser, expandTilde
-
 template joinImpl[T](a, b: T): T = mapPathLike[T] joinPath($a.fspath, $b.fspath)
 
 proc nestListWithFirst*(op: NimNode; pack: NimNode; first: NimNode): NimNode =
@@ -138,4 +139,3 @@ proc normcase*[T](s: PathLike[T]): T =
     return LCMapStringEx(LOCALE_NAME_INVARIANT,
                           LCMAP.LOWERCASE,
                           s.replace('/', '\\'))
-
