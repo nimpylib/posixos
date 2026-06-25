@@ -49,7 +49,12 @@ fsExp dirname, parentDir
 
 fsExp basename, extractFilename  # instead of lastPathPart
 
-psExp abspath, absolutePath
+template myAbsolutePath(x): untyped =
+  # absolutePath raises ValueError if x is not absolute
+  normpath:
+    try: absolutePath x
+    except ValueError: x
+psExp abspath, myAbsolutePath
 psExp normpath, normalizedPath
 
 func relpath*[T](p: PathLike[T], start=curdir): T =
@@ -76,7 +81,11 @@ template split2Via(p, fn) =
   result[1] = mapPathLike[T] t[1]
 
 func split*[T](p: PathLike[T]): (T, T) = p.split2Via nos.splitPath
-func splitdrive*[T](p: PathLike[T]): (T, T) = p.split2Via nos.splitDrive
+func splitdrive*[T](p: PathLike[T]): (T, T) =
+  when defined(windows):
+    p.split2Via nos.splitDrive
+  else:
+    (T"", fspath p)
 # Nim's os.splitDrive is adapted from Python's alreadly.
 
 func splitext*[T](p: PathLike[T]): (T, T) =
