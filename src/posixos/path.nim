@@ -82,7 +82,7 @@ func splitdrive*[T](p: PathLike[T]): (T, T) = p.split2Via nos.splitDrive
 func splitext*[T](p: PathLike[T]): (T, T) =
   let t = p.fspath
   let s = $t
-  let idx = s.searchExtPos(s)
+  let idx = s.searchExtPos()
   if idx == -1:
     return (t, mapPathLike[T](""))
   result = (
@@ -120,9 +120,9 @@ proc samefile*(a, b: PathLike): bool =
     result = samestat(stat(a), stat(b))
 
 proc normcase*[T](s: PathLike[T]): T =
- when not defined(windows): os.fspath(s) else:
+ when not defined(windows): fspath(s) else:
   # ntpath:
-  var s = os.fspath(s)
+  var s = fspath(s)
   if s.len == 0:
     return s
   when T is PyBytes:
