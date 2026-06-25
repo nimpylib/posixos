@@ -231,9 +231,17 @@ when InJs:
 
 template statAttr*(path: PathLike|int, attr: untyped): untyped =
   ## stat(`path`).`attr`
+  bind InJs
+  bind raiseExcWithPath
   var st{.noinit.}: Stat
-  statAux st, path
-  st.attr
+  when InJs:
+    statAux st, path
+    attr(st)
+  else:
+    let res = when path is int: fstat(path, st) else: stat($path, st)
+    if res != 0:
+      raiseExcWithPath path
+    st.attr
 
 
 when DWin:

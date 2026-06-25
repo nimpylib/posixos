@@ -71,9 +71,19 @@ else:
   expFRetTAsF getmtime, getLastModificationTime
   expFRetTAsF getatime, getLastAccessTime
 
-proc getsize*[T](filename: PathLike[T]): int =
+template jsAttrEAsOsE(res): untyped =
+  when not defined(js):
+    res
+  else:
+    try: res
+    except AttributeError as e:
+      raise newException(OSError,
+        "underlying js stat lacks attribute: " & e.msg)
+
+proc getsize*[T](filename: PathLike[T]): int{.raises: [OSError].} =
   # std/os.`getFileSize` doesn't work for directory
-  int statAttr(filename, st_size)
+  jsAttrEAsOsE:
+    int statAttr(filename, st_size)
 
 template split2Via(p, fn) =
   let t = fn $p
@@ -124,9 +134,10 @@ proc samestat*(s1, s2: stat_result): bool =
    return (s1.st_ino == s2.st_ino and
             s1.st_dev == s2.st_dev)
 
-proc samefile*(a, b: PathLike): bool =
+proc samefile*(a, b: PathLike): bool{.raises: [OSError, ValueError].} =
   tryOsOp(a, b):
-    result = samestat(stat(a), stat(b))
+    jsAttrEAsOsE:
+      result = samestat(stat(a), stat(b))
 
 proc normcase*[T](s: PathLike[T]): T =
  when not defined(windows): fspath(s) else:
