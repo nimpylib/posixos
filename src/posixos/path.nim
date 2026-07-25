@@ -134,7 +134,7 @@ proc samestat*(s1, s2: stat_result): bool =
    return (s1.st_ino == s2.st_ino and
             s1.st_dev == s2.st_dev)
 
-proc samefile*(a, b: PathLike): bool{.raises: [OSError, ValueError].} =
+proc samefile*(a, b: PathLike): bool{.raises: [OSError, ValueError, NotImplementedError].} =
   tryOsOp(a, b):
     jsAttrEAsOsE:
       result = samestat(stat(a), stat(b))

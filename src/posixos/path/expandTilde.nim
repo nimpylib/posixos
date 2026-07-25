@@ -2,14 +2,15 @@ from std/os import getEnv
 import std/strutils
 
 
-when defined(posix):
+const hasPwd = defined(posix) and not defined(wasm)
+when hasPwd:
   import pkg/grp_pwd
 
 proc getHomeDir*(username: string): string =
   ## Returns the home directory for `username`.
   ##
   ## Raises `KeyError` when the user is not present in the passwd database.
-  when defined(posix):
+  when hasPwd:
     result = getpwnam(username).pw_dir
   else:
     raise newException(KeyError, "getHomeDir(): username not found: " & username)
@@ -47,7 +48,7 @@ proc expandTilde*(path: string): string =
       return path
     return home.rstripEnd & tail
 
-  when defined(posix):
+  when hasPwd:
     try:
       let home = getHomeDir(path[1 ..< sepIdx])
       if home.len == 0:
