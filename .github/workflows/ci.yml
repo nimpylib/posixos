@@ -14,7 +14,10 @@ env:
   nim-version: 'stable'
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
     - name: Cache nimble
@@ -31,4 +34,5 @@ jobs:
       run: nimble test
 
     - name: test js
+      if: runner.os == 'Linux'
       run: nimble test -b:js -d:nodejs
