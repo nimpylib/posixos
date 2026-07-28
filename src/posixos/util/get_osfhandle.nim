@@ -4,4 +4,4 @@ when defined(windows):
   import ../private/iph_utils
   proc Py_get_osfhandle_noraise*(fd: int): Handle =
     with_Py_SUPPRESS_IPH:
-      result = get_osfhandle FileHandle fd
+      result = get_osfhandle cint fd

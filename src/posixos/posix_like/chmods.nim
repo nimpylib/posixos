@@ -35,7 +35,7 @@ elif not useMS_WINDOWSproc:
 else: # MS_WINDOWS and not JS
   import ../util/mywinlean
   import std/widestrs
-  import ../../stat_impl/consts
+  import pkg/pystat/consts
 
 
   proc SetFileInformationByHandle(

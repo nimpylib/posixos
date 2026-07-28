@@ -5,7 +5,7 @@ import std/macros
 import pkg/handy_sugars/trans_imp
 when defined(windows):
   from std/strutils import replace
-  import pkg/py_winapi/cwrap/locale
+  import pkg/py_winapi/cwrap/locales
 import ./posix_like/stat
 
 import ./common

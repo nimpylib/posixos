@@ -22,8 +22,6 @@ template pylib(x, ver) =
            else: pylibPre & x
 
 pylib "handy_sugars", " ^= 0.1.0"
-when defined(windows):
-  pylib "py_private_utils", " ^= 0.1.0"
 
 pylib "auditfunc", " ^= 0.1.0"
 pylib "py_private_utils", " ^= 0.1.0"
