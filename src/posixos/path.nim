@@ -1,11 +1,15 @@
 
+when defined(nimPreviewSlimSystem):
+  import std/assertions
 import std/os as nos
 import std/times as ntimes
 import std/macros
 import pkg/handy_sugars/trans_imp
 when defined(windows):
   from std/strutils import replace
+  import std/private/ntpath
   import pkg/py_winapi/cwrap/locales
+  import pkg/pysimperr/aritherr
 import ./posix_like/stat
 
 import ./common
@@ -93,7 +97,7 @@ template split2Via(p, fn) =
 func split*[T](p: PathLike[T]): (T, T) = p.split2Via nos.splitPath
 func splitdrive*[T](p: PathLike[T]): (T, T) =
   when defined(windows):
-    p.split2Via nos.splitDrive
+    p.split2Via ntpath.splitDrive
   else:
     (T"", fspath p)
 # Nim's os.splitDrive is adapted from Python's alreadly.
@@ -139,6 +143,12 @@ proc samefile*(a, b: PathLike): bool{.raises: [OSError, ValueError, NotImplement
     jsAttrEAsOsE:
       result = samestat(stat(a), stat(b))
 
+
+proc unreachable() {.noReturn.} = doAssert false
+template neverE[T](res: T): T =
+  try: res
+  except ValueError, aritherr.OverflowError: unreachable()
+
 proc normcase*[T](s: PathLike[T]): T =
  when not defined(windows): fspath(s) else:
   # ntpath:
@@ -153,9 +163,9 @@ proc normcase*[T](s: PathLike[T]): T =
       let encoding = sys.getfilesystemencoding()
       s = s.decode(encoding, "surrogateescape").replace('/', '\\')
       s = LCMapStringEx(LOCALE_NAME_INVARIANT,
-                       LCMAP.LOWERCASE, s)
+                       LCMAP.LOWERCASE, s).neverE
       return s.encode(encoding, "surrogateescape")
   else:
     return LCMapStringEx(LOCALE_NAME_INVARIANT,
                           LCMAP.LOWERCASE,
-                          s.replace('/', '\\'))
+                          s.replace('/', '\\')).neverE

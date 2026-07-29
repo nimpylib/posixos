@@ -30,7 +30,7 @@ type
     FileInformationClass: FileInfoByNameClass,
     FileInfoBuffer: pointer,
     FileInfoBufferSize: ULONG
-  ): bool {.stdcall.}
+  ): bool {.stdcall, raises: [].}
 
 var
   GetFileInformationByName: PGetFileInformationByName = nil

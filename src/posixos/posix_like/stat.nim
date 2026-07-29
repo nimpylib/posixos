@@ -229,21 +229,6 @@ when InJs:
         lstatSync(cs)
     st = sst
 
-template statAttr*(path: PathLike|int, attr: untyped): untyped =
-  ## stat(`path`).`attr`
-  bind InJs
-  bind raiseExcWithPath
-  var st{.noinit.}: Stat
-  when InJs:
-    statAux st, path
-    attr(st)
-  else:
-    let res = when path is int: fstat(path, st) else: stat($path, st)
-    if res != 0:
-      raiseExcWithPath path
-    st.attr
-
-
 when DWin:
   const secs_between_epochs = 11644473600'i64 # Seconds between 1.1.1601 and 1.1.1970
 
@@ -543,6 +528,10 @@ template def3STAT(S, L, F){.dirty.} =
   template LSTAT(p: string, s): cint = L
   template FSTAT(p: int, s): cint = F
 
+proc Py_fstat_noraise*(fd: int, status: var Stat): cint{.raises: [].}
+  ## EXT.
+  ## 
+  ## fileutils.c `_Py_fstat_noraise`
 
 when DWin:
   def3STAT(
@@ -565,6 +554,25 @@ else:
      posix.lstat(cstring p, s),
      posix.fstat(cint p, s),
   )
+
+template defStatAttr(body) {.dirty.} =
+  template statAttr*(path: PathLike|int, attr: untyped): untyped =
+    ## stat(`path`).`attr`
+    body
+when InJs:
+  defStatAttr:
+    bind statAux
+    var st{.noinit.}: Stat
+    statAux st, path
+    attr(st)
+else:
+  defStatAttr:
+    bind raiseExcWithPath, FSTAT, Stat, STATf
+    var st{.noinit.}: Stat
+    let res = when path is int: FSTAT(path, st) else: STATf($path, st)
+    if res != 0:
+      raiseExcWithPath path
+    st.attr
 
 proc Py_fstat_noraise*(fd: int, status: var Stat): cint =
   ## EXT.
