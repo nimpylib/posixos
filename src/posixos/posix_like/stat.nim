@@ -649,7 +649,7 @@ proc do_stat_impl(result: var Stat; function_name: string, path: string|int, dir
           res = fstatat(dir_fd, cstring path, result,
             if follow_symlinks: 0 else: AT_SYMLINK_NOFOLLOW)
         else:
-          fstat_unavailable = true
+          fstatat_unavailable = true
       else:
         doStat()
     else:
