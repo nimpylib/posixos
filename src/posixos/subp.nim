@@ -1,6 +1,6 @@
 
 import ./common
-when not defined(js):
+when not defined(js) and not defined(wasm):
   proc c_system(cmd: cstring): cint{.importc: "system", header: "<stdlib.h>".}
 
 proc system*(command: string): int{.discardable.} =
@@ -22,6 +22,8 @@ proc system*(command: string): int{.discardable.} =
     `res` = childProcess.exitCode;
     """
     result = res.int
+  elif defined(wasm):
+    # WASI has no libc system() or process-spawn API.
+    result = -1
   else:
     c_system command.cstring
-
