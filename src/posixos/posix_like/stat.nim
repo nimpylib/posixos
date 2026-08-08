@@ -541,8 +541,11 @@ when DWin:
   )
 elif InJs:
   template ret0(body): cint =
-    body
-    0
+    try:
+      body
+      0
+    except oserror_decl.PyOSError as e:
+      e.errno
   def3STAT(
     ret0 statAux(s, p),
     ret0 lstatAux(s, p),
