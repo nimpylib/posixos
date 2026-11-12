@@ -4,8 +4,7 @@ template importConfig*(name) =
 
 import ../private/defined_macros
 export defined_macros
-when not InJS:
-  const useMS_WINDOWSproc = MS_WINDOWS
-else:
-  const useMS_WINDOWSproc = false
+
+import pkg/pyosstat/private/pyCfg
 export useMS_WINDOWSproc
+

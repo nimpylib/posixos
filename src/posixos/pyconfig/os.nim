@@ -1,10 +1,9 @@
 
 import ./util
 import ./have_x_runtime
+import pkg/pyosstat/private/pyconfig/os_consts as lib
+export lib
 const
-  DEFAULT_DIR_FD* = from_c_int(AT_FDCWD, "<fcntl.h>", -100)
-  AT_SYMLINK_NOFOLLOW* = from_c_int(AT_SYMLINK_NOFOLLOW, "<fcntl.h>", 0x100)
-
   HAVE_OPENAT* = true
   HAVE_FTRUNCATE* = true
 

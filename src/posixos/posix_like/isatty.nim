@@ -1,4 +1,4 @@
 
-import pkg/pyio_open/private/isatty
+import pkg/vsyncio/extra/isatty
 export isatty
 
